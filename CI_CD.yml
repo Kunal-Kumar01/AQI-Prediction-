@@ -53,7 +53,7 @@ jobs:
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}  # Reference the secret
       run: |
-        python Prediction.py  # Replace with the appropriate script or logic
+        python Prediction.ipynb  # Replace with the appropriate script or logic
         
 
     
