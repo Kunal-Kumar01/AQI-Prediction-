@@ -53,23 +53,8 @@ jobs:
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}  # Reference the secret
       run: |
-        python Prediction.py  # Replace with the appropriate script or logic
+        jupyter nbconvert --execute --to notebook --inplace Prediction.ipynb
 
-    # Run Tests (Optional)
-    - name: Run Tests
-      run: |
-        pytest tests/  # Ensure you have a 'tests/' directory with test cases
+        
 
-    # Deploy to Hopsworks (Optional)
-    - name: Deploy to Hopsworks
-      if: github.ref == 'refs/heads/main'
-      env:
-        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}  # Reference the secret
-      run: |
-        python deploy.py  # Add your deployment script if applicable
-
-    # Lint Code (Optional)
-    - name: Lint Code
-      run: |
-        pip install flake8
-        flake8 .
+    
