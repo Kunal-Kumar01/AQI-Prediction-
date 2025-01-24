@@ -1,0 +1,75 @@
+name: AQI-Prediction CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Schedule the workflow to run every hour
+    - cron: "0 * * * *"  # Runs at the start of every hour (UTC time)
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"  # Replace with your preferred Python version
+
+    # Install dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Run Raw Data Notebook
+    - name: Run Raw Data Notebook
+      run: |
+        pip install nbconvert  # Ensure Jupyter is available
+        jupyter nbconvert --execute --to notebook --inplace Raw_Data.ipynb
+
+    # Run Compute Features Notebook
+    - name: Run Compute Features Notebook
+      run: |
+        jupyter nbconvert --execute --to notebook --inplace Compute_Features.ipynb
+
+    # Run Feature Store Notebook
+    - name: Run Feature Store Notebook
+      run: |
+        jupyter nbconvert --execute --to notebook --inplace Feature_Store.ipynb
+
+    # Run Prediction Notebook
+    - name: Run Prediction Notebook
+      env:
+        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}  # Reference the secret
+      run: |
+        python Prediction.py  # Replace with the appropriate script or logic
+
+    # Run Tests (Optional)
+    - name: Run Tests
+      run: |
+        pytest tests/  # Ensure you have a 'tests/' directory with test cases
+
+    # Deploy to Hopsworks (Optional)
+    - name: Deploy to Hopsworks
+      if: github.ref == 'refs/heads/main'
+      env:
+        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}  # Reference the secret
+      run: |
+        python deploy.py  # Add your deployment script if applicable
+
+    # Lint Code (Optional)
+    - name: Lint Code
+      run: |
+        pip install flake8
+        flake8 .
